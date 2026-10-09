@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{
+            background-color:#050710;
+            /* 正确无缝网格背景 */
+            background-image:
+                repeating-linear-gradient(to right, rgba(32, 210, 182, 0.04) 0 1px, transparent 1px 25px),
+                repeating-linear-gradient(to bottom, rgba(32, 210, 182, 0.04) 0 1px, transparent 1px 25px),
+                radial-gradient(ellipse at 30% 50%, rgba(16, 220, 180, 0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 60%, rgba(16, 220, 180, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 25%, rgba(20, 190, 220, 0.12) 0%, transparent 50%);
+            background-size:
+                25px 25px,
+                25px 25px,
+                100% 100%,
+                100% 100%,
+                100% 100%;
+            background-position: center center;
+            background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+            min-height:100vh;
+        }
+        /* 页面震动动画 密码错误 */
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-8px); }
+            80% { transform: translateX(8px); }
+        }
+        .shake{
+            animation: shake 0.4s ease;
+        }
+        .login-box{
+            background:rgba(40,48,70,0.35);
+            backdrop-filter: blur(8px);
+            border:1px solid rgba(32, 210, 182, 0.25);
+            /* 圆角小窗口 */
+            border-radius: 16px;
+            width: 100%;
+            max-width: 360px;
+        }
+        .login-input{
+            background:rgba(20,28,45,0.5);
+            border:1px solid rgba(32, 210, 182, 0.3);
+            color:#fff;
+            outline:none;
+        }
+        .login-input:focus{
+            border-color:rgba(34, 216, 194, 0.85);
+            box-shadow: 0 0 12px rgba(32, 210, 182,0.4);
+        }
+        .login-btn{
+            background:rgba(40,48,70,0.45);
+            border:1px solid rgba(32, 210, 182, 0.35);
+            transition: all 0.25s ease;
+        }
+        .login-btn:hover{
+            border-color:rgba(34, 216, 194, 0.85);
+            background:rgba(44, 62, 88, 0.55);
+            box-shadow: 0 6px 20px rgba(32, 210, 182, 0.45);
+        }
+        .btn-item{
+            background:rgba(40,48,70,0.35);
+            backdrop-filter: blur(8px);
+            border:1px solid rgba(32, 210, 182, 0.25);
+            transition: all 0.25s ease;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            justify-content:flex-start;
+            padding-left:12px;
+            min-width:140px;
+            flex: 0 1 160px;
+            cursor:pointer;
+        }
+        /* 按钮hover青蓝色高亮发光 */
+        .btn-item:hover{
+            border-color:rgba(34, 216, 194, 0.85);
+            background:rgba(44, 62, 88, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(32, 210, 182, 0.45);
+        }
+        .char-icon{
+            width:36px;
+            height:36px;
+            border-radius:8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:bold;
+            font-size:20px;
+            background-clip:text;
+            -webkit-background-clip:text;
+            color:transparent;
+            background-image:linear-gradient(135deg,#20d2b6,#22b8e8);
+            box-shadow: 0 0 4px rgba(32, 210, 182,0.3), inset 0 0 3px rgba(34,184,232,0.2);
+            transition: all 0.25s ease;
+            flex-shrink:0;
+        }
+        .btn-item:hover .char-icon{
+            box-shadow: 0 0 10px rgba(32, 210, 182,0.6), inset 0 0 6px rgba(34,184,232,0.4);
+        }
+        .group-title-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:12px;
+        }
+        .decor-line-short{
+            width:4px;
+            height:18px;
+            background:linear-gradient(180deg,#20d2b6,#22b8e8);
+            border-radius:2px;
+        }
+        .divider-line{
+            flex:1;
+            height:1px;
+            background:linear-gradient(90deg, rgba(32, 210, 182,0.4),transparent);
+        }
+        a{
+            text-decoration: none;
+            color:white;
+        }
+        .tool-item{
+            opacity:0;
+            animation: fadeIn 0.25s ease forwards;
+        }
+        @keyframes fadeIn{
+            to{opacity:1;}
+        }
+        /* 登录页、主页面容器 */
+        #login-page{
+            display:flex;
+        }
+        #main-page{
+            display:none;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 text-white">
+    <!-- 密码登录页面 -->
+    <div id="login-page" class="w-full min-h-screen flex justify-center items-center">
+        <div class="login-box p-7">
+            <h2 class="text-2xl text-cyan-100 font-bold text-center">亲切音频工具箱</h2>
+            <p class="text-cyan-200 text-[10px] opacity-70 text-center mt-1 mb-6">感谢选择亲切音频，请输入密码</p>
+            <input id="pwd-input" type="password" class="login-input w-full px-4 py-3 rounded-lg mb-4 text-base" placeholder="输入访问密码">
+            <div id="err-tip" class="text-red-400 text-sm h-5 mb-3 text-center hidden">密码错误，请重新输入</div>
+            <button id="login-btn" class="login-btn w-full py-3 rounded-lg text-cyan-100 font-medium">确认登录</button>
+        </div>
+    </div>
+
+    <!-- 主工具箱页面 -->
+    <div id="main-page">
+        <!-- 标题+竖线+时间日期横向排列，移动端自动换行 -->
+        <div class="mb-8 flex flex-wrap justify-center items-center gap-3">
+            <h1 class="text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-cyan-100">亲切音频工具箱</h1>
+            <span class="text-cyan-400 text-lg">|</span>
+            <div class="flex flex-col items-center leading-tight text-cyan-200 opacity-80">
+                <span id="now-time" class="text-xl font-medium"></span>
+                <span id="now-date" class="text-[10px] opacity-70"></span>
+            </div>
+        </div>
+        <div id="container"></div>
+    </div>
+
+    <script>
+        // ========= 配置 =========
+        const PASSWORD = "814355555aa";
+        const linkList = [
+            // 系统工具
+            {name:"EasyRc一键装机",url:"https://firpe.cn/page-196",group:"系统工具"},
+            {name:"系统优化工具备用",url:"https://links.8uid.com/d/1959d58b642d403b6df89e01d20a2a4a",group:"系统工具"},
+            {name:"强力卸载工具备用",url:"https://links.8uid.com/d/5e91227a19e66175fe67001746410b6a",group:"系统工具"},
+            {name:"大小核优化工具备用",url:"https://links.8uid.com/d/24cabf60df4aa15b8ff90add6a84e447",group:"系统工具"},
+            {name:"调音师工具箱备用",url:"https://links.8uid.com/d/3fffe9bcd1715687089735e59427ec4c",group:"系统工具"},
+            // 声卡驱动
+            {name:"艾肯（iCON）官网",url:"https://iconproaudio.com.cn/",group:"声卡驱动"},
+            {name:"迷笛（MIDIPLUS）官网",url:"https://midiplus.com/",group:"声卡驱动"},
+            {name:"马头（MOTU）官网",url:"https://motu.com/",group:"声卡驱动"},
+            {name:"雅马哈（YAMAHA）官网",url:"https://www.yamaha.com/",group:"声卡驱动"},
+            {name:"RME官网",url:"https://rme-audio.de/",group:"声卡驱动"},
+            {name:"Apogee官网",url:"https://apogeedigital.com/",group:"声卡驱动"},
+            {name:"Apollo（阿波罗）官网",url:"https://www.uaudio.com/",group:"声卡驱动"},
+            {name:"拓品（Topping）官网",url:"https://cn.topping.pro/",group:"声卡驱动"},
+            {name:"M-Audio（美奥多）官网",url:"https://m-audio.com/",group:"声卡驱动"},
+            {name:"IXI官网",url:"https://www.ixiaudio.com/",group:"声卡驱动"},
+            {name:"ickb官网",url:"https://www.ickb.cn/",group:"声卡驱动"},
+            {name:"森然（Seeknature）官网",url:"https://www.sknature.com/",group:"声卡驱动"},
+            {name:"客所思官网",url:"https://kesuosi.com/",group:"声卡驱动"},
+            {name:"普瑞声纳（PreSonus）官网",url:"https://www.presonus.com/",group:"声卡驱动"},
+            {name:"百灵达（Behringer）官网",url:"https://www.behringer.com/",group:"声卡驱动"},
+            {name:"羚羊（Antelope）官网",url:"https://en.antelopeaudio.com/",group:"声卡驱动"},
+            {name:"德国坦克（TerraTec）官网",url:"http://www.centrmus.com/",group:"声卡驱动"},
+            {name:"福克斯特（Focusrite) 官网",url:"https://www.focusrite.com/",group:"声卡驱动"},
+            {name:"内置声卡3552驱动",url:"https://links.8uid.com/d/15af9c9c061b38faee72236b9b424a84",group:"声卡驱动"},
+            {name:"虚拟跳线",url:"https://links.8uid.com/d/4e0296912d4b12bf27a00e6f5f894520",group:"声卡驱动"},
+            // 宿主机架
+            {name:"Studio one 6",url:"https://links.8uid.com/d/c88f8e05491d1a6d05cfdde4162e248c",group:"宿主机架"},
+            {name:"Studio pro 8",url:"https://links.8uid.com/d/15e22e2261e12a8c9ab75cf2f0a93250",group:"宿主机架"},
+            // 效果插件
+            {name:"亲切插件包（64Bit）",url:"https://links.8uid.com/d/85a03d9da8e231c195bb552e40206182",group:"效果插件"},
+            {name:"备用插件包（64Bit）",url:"https://links.8uid.com/d/0fddb96b0838621a02e7ec43e08b3cd9",group:"效果插件"},
+            {name:"老版插件包（64Bit）",url:"https://links.8uid.com/d/804c9a5611e9a1563d1f66edc703e3a5",group:"效果插件"},
+            {name:"Rx10插件",url:"https://links.8uid.com/d/25c30ba575b8980123d143131f7426f5",group:"效果插件"},
+            {name:"VerberateBasic",url:"https://links.8uid.com/d/79cbd01e79380d4f21bdebda98b37b78",group:"效果插件"},
+            // 其他软件
+            {name:"向日葵远程官网",url:"https://sunlogin.oray.com/",group:"其他软件"},
+            {name:"Todesk远程官网",url:"https://www.todesk.com/",group:"其他软件"},
+            {name:"Ts3中文官网",url:"https://ts3.com.cn/downloads/teamspeak",group:"其他软件"},
+            {name:"YY语音官网",url:"https://www.yy.com/download",group:"其他软件"},
+            {name:"TT语音官网",url:"https://www.52tt.com/",group:"其他软件"},
+            {name:"OBS官网",url:"https://obsproject.com/download",group:"其他软件"},
+            {name:"YY开播官网",url:"https://v.yy.com/",group:"其他软件"},
+            {name:"ivcam官网",url:"https://e2esoft.cn/ivcam/",group:"其他软件"},
+            {name:"无他伴侣官网",url:"https://www.wuta-cam.com/wuta_vcam_html/release/index.html#/",group:"其他软件"},
+            {name:"电音助手",url:"https://links.8uid.com/d/9d6248a28dfe64abe8559466082b0225",group:"其他软件"},
+            {name:"音效助手",url:"https://links.8uid.com/d/769294ecd8b05738c871607859d2c40f",group:"其他软件"},
+            {name:"离线解密",url:"https://links.8uid.com/d/2b89ec8920856b2a5a11ffc7ed1487d0",group:"其他软件"},
+            // 播放器类
+            {name:"酷狗音乐",url:"https://www.kugou.com/",group:"播放器类"},
+            {name:"全民K歌",url:"https://kg.qq.com/",group:"播放器类"},
+            {name:"QQ音乐",url:"https://y.qq.com/",group:"播放器类"},
+            {name:"网易云音乐",url:"https://music.163.com/",group:"播放器类"},
+            {name:"汽水音乐",url:"https://music.douyin.com/",group:"播放器类"},
+            {name:"酷我音乐",url:"https://www.kuwo.cn/",group:"播放器类"},
+            {name:"咪咕音乐",url:"music.migu.cn/",group:"播放器类"},
+            {name:"千千音乐",url:"https://www.91q.com/",group:"播放器类"},
+            {name:"豆瓣音乐",url:"https://music.douban.com/",group:"播放器类"},
+            {name:"虾米音乐",url:"https://www.xiami.com/",group:"播放器类"},
+            // 直播软件
+            {name:"抖音直播伴侣官网",url:"https://streamingtool.douyin.com/",group:"直播软件"},
+            {name:"快手直播伴侣官网",url:"https://live.kuaishou.com/live-partner",group:"直播软件"},
+            {name:"YY语音官网",url:"https://www.yy.com/yy8/",group:"直播软件"},
+            {name:"TT语音官网",url:"https://www.shierkai.cn/",group:"直播软件"},
+            {name:"YY开播官网",url:"https://v.yy.com/",group:"直播软件"},
+            {name:"Billbili直播官网",url:"https://live.bilibili.com/",group:"直播软件"},
+            {name:"虎牙直播伴侣官网",url:"https://hd.huya.com/download/",group:"直播软件"},
+            {name:"斗鱼直播伴侣官网",url:"https://www.douyu.com/docs/dytools?docId=237835",group:"直播软件"},
+            {name:"微信视频号官网",url:"https://channels.weixin.qq.com/login.html",group:"直播软件"},
+            {name:"酷狗繁星直播伴侣官网",url:"https://fanxing.kugou.com/cterm/accompany/pc/views/index.html",group:"直播软件"},
+            {name:"双鱼部落官网",url:"https://dl.shuangyuxingqiu.com/home",group:"直播软件"},
+            {name:"哆咪星球官网",url:"https://h5.enlargemagic.com//h5/modules/project/index.html#/PCdownload",group:"直播软件"},
+            {name:"他Ta星球官网",url:"https://www.tataxingqiu.com/#/",group:"直播软件"},
+            {name:"不夜星球官网",url:"https://sleeplessplanet.com/home",group:"直播软件"},
+            {name:"CU语音官网",url:"https://tutu.wemogu.net/",group:"直播软件"},
+            {name:"捞月狗官网",url:"https://www.laoyuegou.com/",group:"直播软件"},
+            {name:"Yo语音官网",url:"yomi.yy.com/",group:"直播软件"},
+            {name:"鱼音官网",url:"https://pc-1306777928.cos.ap-beijing.myqcloud.com/yuyin-win/audio_setup.exe",group:"直播软件"},
+            {name:"梦音官网",url:"https://pc.sqkm2023.com/",group:"直播软件"},
+            {name:"小酒窝语音官网",url:"xiaojiuwo-live.cn/",group:"直播软件"},
+            {name:"Hello语音官网",url:"hello.520hello.com/",group:"直播软件"},
+            {name:"Soul官网",url:"https://www.soulapp.cn/",group:"直播软件"},
+            {name:"回森官网",url:"www.zhongnice.com/",group:"直播软件"},
+            {name:"轻语官网",url:"https://qingyujiaoyou.com/",group:"直播软件"},
+            {name:"耳渔星球官网",url:"apphome.xianshenglive.com/",group:"直播软件"},
+            {name:"鱼耳官网",url:"https://www.bxyuer.com/",group:"直播软件"},
+            {name:"VV星球官网",url:"vvxqiu.com/#/",group:"直播软件"},
+            {name:"荔枝FM官网",url:"https://www.lizhi.fm/about/download_live_tools",group:"直播软件"},
+            {name:"蓝伴语音官网",url:"linkfunapp.com/",group:"直播软件"},
+        ];
+        const weekText = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+
+        // 打开外部链接，调用系统默认浏览器
+        function openExternal(url){
+            window.open(url,"_system");
+        }
+
+        // 登录逻辑
+        const loginPage = document.getElementById('login-page');
+        const mainPage = document.getElementById('main-page');
+        const pwdInput = document.getElementById('pwd-input');
+        const loginBtn = document.getElementById('login-btn');
+        const errTip = document.getElementById('err-tip');
+
+        function doLogin(){
+            const val = pwdInput.value.trim();
+            if(val === PASSWORD){
+                loginPage.style.display="none";
+                mainPage.style.display="block";
+                buildPage();
+                refreshDateTime();
+            }else{
+                // 震动+提示
+                loginPage.classList.add('shake');
+                errTip.classList.remove('hidden');
+                setTimeout(()=>{
+                    loginPage.classList.remove('shake');
+                },400);
+            }
+        }
+        loginBtn.addEventListener('click',doLogin);
+        pwdInput.addEventListener('keydown',(e)=>{
+            if(e.key === 'Enter') doLogin();
+        });
+
+        function refreshDateTime(){
+            const d = new Date();
+            let h = String(d.getHours()).padStart(2,'0');
+            let m = String(d.getMinutes()).padStart(2,'0');
+            let s = String(d.getSeconds()).padStart(2,'0');
+            document.getElementById("now-time").innerText = `${h}:${m}:${s}`;
+            const month = d.getMonth() + 1;
+            const day = d.getDate();
+            const week = weekText[d.getDay()];
+            document.getElementById("now-date").innerText = `${month}月${day}日 ${week}`;
+        }
+        setInterval(refreshDateTime, 1000);
+
+        // 渲染主界面
+        function buildPage(){
+            const box = document.getElementById("container");
+            box.innerHTML = "";
+            const groups = ["系统工具","声卡驱动","宿主机架","效果插件","其他软件","播放器类","直播软件"];
+            let staggerIndex = 0;
+            groups.forEach(gName=>{
+                const items = linkList.filter(x=>x.group === gName);
+                const wrap = document.createElement("div");
+                wrap.className = "mb-7";
+                wrap.innerHTML = `
+                <div class="group-title-wrap">
+                    <span class="decor-line-short"></span>
+                    <span class="text-cyan-300 text-lg">${gName}</span>
+                    <span class="divider-line"></span>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                </div>`;
+                const btnWrap = wrap.querySelector("div:last-child");
+                items.forEach(item=>{
+                    staggerIndex += 1;
+                    const div = document.createElement("div");
+                    div.className = "btn-item px-4 py-3 rounded-lg tool-item";
+                    div.style.animationDelay = staggerIndex * 0.04 + "s";
+                    let firstChar = item.name.charAt(0);
+                    if(/[a-z]/.test(firstChar)) firstChar = firstChar.toUpperCase();
+                    let displayName = item.name.replace(/官网/g,'').replace(/备用/g,'');
+                    div.innerHTML = `
+                    <span class="char-icon">${firstChar}</span>
+                    <span class="text-white text-sm">${displayName}</span>`;
+                    // 点击事件：打开默认浏览器
+                    div.onclick = ()=> openExternal(item.url);
+                    btnWrap.appendChild(div);
+                });
+                box.appendChild(wrap);
+            });
+        }
+    </script>
+</body>
+</html>
